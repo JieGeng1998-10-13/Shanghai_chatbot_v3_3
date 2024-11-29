@@ -29,7 +29,7 @@ def create_milvus_collection(collection_name, dim):
     return collection
 
 
-collection = create_milvus_collection('images_test', 657)
+collection = create_milvus_collection('images_final', 657)
 
 
 with open('embeddings.pkl', 'rb') as f:

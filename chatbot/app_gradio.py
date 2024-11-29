@@ -1,5 +1,9 @@
 from langgraph.graph import StateGraph
 import gradio as gr
+
+from utils.law_catagory1_get_law import call_model_get_law
+from utils.law_catagory2_law_detail import call_problem_detail
+from utils.law_catagory3_law_example import call_problem_example
 from utils.tools import GraphState  # 图结构数据类型声明
 from langgraph.graph import END
 from utils.function_tools import route_question, call_model, call_model_SQL_prompt
@@ -12,6 +16,7 @@ from utils.enhencement_functions import route_question_enhencement
 #from utils.noun_retriever import noun_retriever_prompt
 from utils.noun_retriever_Mil import noun_retriever_prompt  # 用Milvus数据库进行名词向量检索
 from utils.law_selection import route_question_law
+import re
 
 
 workflow = StateGraph(GraphState)
@@ -31,21 +36,26 @@ workflow.add_node("information_filter", call_model_filter)
 
 #Define four law nodes
 
-# Define three four nodes
 workflow.add_node("law_question", law_question_prompt) # 替换为正确的函数
 
-workflow.add_node("retrieve_law", call_model_raglaw)
-workflow.add_node("meaning_large_retrieve", call_model_raglaw) #替换为正确的函数
-workflow.add_node("similarity_retrieve", call_model_raglaw)
+# 法律分类
+workflow.add_node("get_law", call_model_get_law)
+workflow.add_node("problem_detail", call_problem_detail) #替换为正确的函数
+workflow.add_node("problem_example", call_problem_example)
+
 
 # Define the edges
 workflow.add_edge("answer_directly", END)
 # workflow.add_edge("retrieve_SQL_prompt", "retrieve_SQL")
 workflow.add_edge("retrieve_SQL", END)
-workflow.add_edge("retrieve_law", END)
 workflow.add_edge("SQL_enhencement", "enhencement_processing")
 workflow.add_edge("enhencement_processing", "information_filter")
 workflow.add_edge("information_filter", END)
+
+# 法律边
+workflow.add_edge("get_law", END)
+workflow.add_edge("problem_detail", END)
+workflow.add_edge("problem_example", END)
 
 
 # Build graph
@@ -79,12 +89,14 @@ workflow.add_conditional_edges(
     # Next, we pass in the function that will determine which node is called next.
     route_question_law,
     {
-        "clear_question": "retrieve_law",
-        "law_details": "meaning_large_retrieve",
-        "law_examples": "similarity_retrieve"
+        "found_law": "get_law",
+        "law_details": "problem_detail",
+        "law_examples": "problem_example"
 
     },
 )
+
+
 
 
 memory = MemorySaver()

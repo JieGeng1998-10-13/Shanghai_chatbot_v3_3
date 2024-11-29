@@ -8,7 +8,7 @@ class GraphState(TypedDict):
     """
 
     question: str  # User question
-
+    question_before_noun_retriever: str
      # Binary decision to run retriever
      # User question
     generation: str  # LLM generation

@@ -16,7 +16,7 @@ import torch.nn as nn
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 加载 PCA 模型和 ResNet50 编码器
-pca = joblib.load('/mnt/workspace/上海市交通系统交易问答框架/Figure_search/pca.pkl')
+pca = joblib.load('/mnt/上海市交通系统交易问答框架/Figure_search/pca.pkl')
 w, h = 224, 224
 
 # 加载预训练的 ResNet50 模型，不包括全连接层
@@ -24,7 +24,7 @@ original_model = models.resnet18(pretrained=False)
 original_model.fc = nn.Linear(in_features=512, out_features=13, bias=True)
 
 # Load your local weights into the model
-weight_path = '/mnt/workspace/上海市交通系统交易问答框架/Figure_search/best.pth'  # Replace with your actual weight file path
+weight_path = '/mnt/上海市交通系统交易问答框架/Figure_search/best.pth'  # Replace with your actual weight file path
 original_model.load_state_dict(torch.load(weight_path, map_location=device), strict=False)
 
 
@@ -67,7 +67,7 @@ preprocess = transforms.Compose([
             ])
 # 连接到 Milvus 数据库
 connections.connect(host='47.102.103.246', port='19530')
-collection = Collection(name='images_test')
+collection = Collection(name='images_final')
 search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
 collection.load()
 
@@ -139,4 +139,4 @@ iface = gr.Interface(
 
 if __name__ == "__main__":
     # 启动 Gradio 前端界面
-    iface.launch()
+    iface.launch(share=True)
